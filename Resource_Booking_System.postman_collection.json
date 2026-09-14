@@ -1,0 +1,2420 @@
+{
+  "info": {
+    "_postman_id": "d3f824d9-b78f-411e-aa98-b5f8d0ba8144",
+    "name": "Resource_Booking_System",
+    "description": "# Resource Booking System API\n\n## Purpose\n\nThis collection exercises a local API for registering and authenticating users, administering resource types and bookable resources, and creating and managing reservations. Requests are organized by functional area and indicate the intended role in their names.\n\n## Base URL\n\n`http://localhost:8080`\n\nThe saved requests currently use this URL directly. Start the API locally on port `8080` before sending requests. The active Postman environment is **Resource Booking Local**.\n\n## Prerequisites\n\n- Run the Resource Booking System API locally at the base URL above.\n    \n- Ensure its backing services and data store are available.\n    \n- Select **Resource Booking Local** when using its authentication values.\n    \n- Register an account if needed, then log in with the role required by the target request.\n    \n- Use valid IDs from your own API data instead of the sample numeric IDs embedded in several saved URLs.\n    \n\n## Authentication\n\nUse the Auth requests to register and log in. After a successful login, take the issued access token and configure protected requests with Postman's **Bearer Token** authentication, or send:\n\n``` http\nAuthorization: Bearer <access-token>\n\n ```\n\nKeep tokens in the active environment or Postman Vault rather than hard-coding them into shared requests. Use an ADMIN token for ADMIN-only operations and a USER token for USER operations. A token does not grant a role beyond the permissions assigned by the API.\n\n## Roles\n\n- **ADMIN** — manages resource types and resources, can view all reservations, and can confirm reservations. Requests marked `ADMIN Only` or `ADMIN` require this role.\n    \n- **USER** — works with permitted read operations and the user's own reservation flow. Requests marked `USER Only` require this role.\n    \n- **ADMIN + USER** — intended for either authenticated role, subject to server-side ownership and authorization rules.\n    \n\n## Folder overview\n\n- **Auth** — registration plus separate saved login requests for ADMIN and USER credentials.\n    \n- **Resource Types** — create, list, retrieve, update, and delete resource classifications.\n    \n- **Resources** — create, list, retrieve, update, and delete bookable resources.\n    \n- **Reservations** — create and manage reservation requests, retrieve reservations, and perform administrative confirmation.\n    \n\n## Endpoints\n\n### Auth\n\n| Method | Path | Access | Purpose |\n| --- | --- | --- | --- |\n| `POST` | `/auth/register` | Public registration flow | Register a user account. |\n| `POST` | `/auth/login` | Public login flow | Authenticate with the saved ADMIN login request and obtain a token for administrative operations. |\n| `POST` | `/auth/login` | Public login flow | Authenticate with the saved USER login request and obtain a token for user operations. |\n\nThe two login requests share the same endpoint but are separated to support different role credentials.\n\n### Resource Types\n\n| Method | Saved path | Access | Purpose |\n| --- | --- | --- | --- |\n| `POST` | `/resource-types/create-resource-type` | ADMIN | Create a resource type used to classify resources. |\n| `GET` | `/resource-types/get-resource-type` | ADMIN or USER | Retrieve the available resource types. |\n| `GET` | `/resource-types/get-resource-type-by-Id/{resourceTypeId}` | ADMIN or USER | Retrieve one resource type by ID. |\n| `PUT` | `/resource-types/update-resource-type-by-Id/{resourceTypeId}` | ADMIN | Update resource type by ID. |\n| `DELETE` | `/resource-types/delete-resource-type/{resourceTypeId}` | ADMIN | Delete a resource type by ID. |\n\n### Resources\n\n| Method | Saved path | Access | Purpose |\n| --- | --- | --- | --- |\n| `POST` | `/resources/createResource` | ADMIN | Create a bookable resource. |\n| `GET` | `/resources/getResource` | ADMIN or USER | Retrive a list of resources |\n| `GET` | `/resources/getResourceById/{resourceId}` | ADMIN or USER | Retrieve one resource by ID. |\n| `PUT` | `/resources/updateResourceById/{resourceId}` | ADMIN | Update a resource by ID |\n| `DELETE` | `/resources/deleteResource/{resourceId}` | ADMIN | Delete a resource by ID. |\n\n### Reservations\n\n| Method | Saved path | Access | Purpose |\n| --- | --- | --- | --- |\n| `POST` | `/reservation/request/createReservation` | ADMIN or USER | Create a reservation request. |\n| `GET` | `/reservation/request/getMyReservation` | USER | Retrieve reservations associated with the authenticated user. |\n| `GET` | `/reservation/request/getReservationById/{reservationId}` | ADMIN or USER | Retrieve one reservation by ID, subject to authorization. |\n| `PATCH` | `/reservation/request/cancelReservation/{reservationId}` | ADMIN or USER | Cancel a reservation by ID, subject to authorization. |\n| `GET` | `/reservation/getAllReservations` | ADMIN | Retrieve all reservations for administrative review. |\n| `PUT` | `/reservation/request/updateReservation/{reservationId}` | ADMIN or USER | Update a reservation by ID, subject to authorization. |\n| `PATCH` | `/reservation/confirmReservation/{reservationId}` | ADMIN | Confirm a reservation by ID. |\n\n## Typical workflow\n\n1. Start the local API and select **Resource Booking Local**.\n    \n2. Register a user if an account does not already exist.\n    \n3. Log in through the ADMIN or USER login request and configure the returned token as {{bearer_token}}\n    \n4. As ADMIN, create a resource type and retain its returned ID.\n    \n5. As ADMIN, create a resource associated with the appropriate type and retain the resource ID.\n    \n6. As ADMIN or USER, inspect available types/resources using the configured read requests.\n    \n7. Create a reservation and retain its reservation ID.\n    \n8. Retrieve, update, or cancel that reservation as permitted.\n    \n9. As ADMIN, review all reservations and confirm the appropriate reservation.\n    \n\n## Path-ID guidance\n\nSeveral saved URLs end in sample IDs such as `2`, `3`, `4`, `5`, or `6`. These are examples from prior local data, not portable constants. Replace the final path segment with an ID returned by the relevant create or list operation:\n\n- `{resourceTypeId}` for resource-type retrieval or deletion.\n    \n- `{resourceId}` for resource retrieval or deletion.\n    \n- `{reservationId}` for reservation retrieval, update, cancellation, or confirmation.\n    \n\nVerify that the selected record exists and that the active token is authorized to access it. If local data is reset, previously saved IDs may no longer be valid.\n\n## Known gaps and cautions\n\n- **Update Resource Type (ADMIN Only)** has no saved URL and is stored with `GET`; its intended update method and route must be confirmed.\n    \n- **Get Resources (ADMIN+USER)** has no saved URL; its intended list route must be confirmed.\n    \n- **Update Resources (ADMIN Only)** has no saved URL and is stored with `GET`; its intended update method and route must be confirmed.\n    \n- Request names, paths, and capitalization are not fully uniform (for example, `Id` versus `ID`, singular versus plural wording, and mixed kebab/camel case). Use the saved paths exactly unless the server contract is updated.\n    \n- The collection does not document authoritative payload fields, response schemas, or exact status codes. Consult the running API contract or implementation before changing request bodies or adding strict assertions.\n    \n- Saved requests contain literal base URLs and sample IDs rather than reusable variables.\n    \n- No saved examples are present, so mock behavior and example-based response documentation are not defined.\n    \n\n> This documentation describes the saved collection without changing any request configuration.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32768115",
+    "_collection_link": "https://go.postman.co/collection/32768115-d3f824d9-b78f-411e-aa98-b5f8d0ba8144?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "item": [
+            {
+              "name": "http://localhost:8080/auth/register",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"user\",\r\n  \"email\": \"user@gmail.com\",\r\n  \"password\": \"user@123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/auth/register",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                },
+                "description": "Registers a new user by accepting the user's name, email, and password. Creates the account with the USER role and returns a JWT token for authentication."
+              },
+              "response": [
+                {
+                  "name": "http://localhost:8080/auth/register",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n  \"name\": \"user1\",\r\n  \"email\": \"user1@gmail.com\",\r\n  \"password\": \"user1@123\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/auth/register",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "auth",
+                        "register"
+                      ]
+                    }
+                  },
+                  "status": "Created",
+                  "code": 201,
+                  "_postman_previewlanguage": null,
+                  "header": [
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Transfer-Encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 14 Sep 2026 10:15:43 GMT"
+                    },
+                    {
+                      "key": "Keep-Alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "Connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"id\": 9,\n    \"name\": \"user1\",\n    \"email\": \"user1@gmail.com\",\n    \"role\": \"USER\"\n}"
+                }
+              ]
+            }
+          ],
+          "description": "Registers a new user by accepting the user's name, email, and password. Creates the account with the USER role and returns a JWT token for authentication."
+        },
+        {
+          "name": "Login User",
+          "item": [
+            {
+              "name": "Admin Login",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"admin@gmail.com\",\r\n  \"password\": \"admin@123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Authenticates an administrator using their email and password.  \nReturns a JWT token that allows the admin to access authorized ADMIN APIs."
+              },
+              "response": [
+                {
+                  "name": "Admin Login",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n  \"email\": \"admin@gmail.com\",\r\n  \"password\": \"admin@123\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/auth/login",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "Text",
+                  "header": [
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Transfer-Encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 14 Sep 2026 09:27:33 GMT"
+                    },
+                    {
+                      "key": "Keep-Alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "Connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"token\": \"{{json_web_token}}\",\n    \"tokenType\": \"Bearer\",\n    \"userId\": 2,\n    \"role\": \"ADMIN\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "User Login",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"sanchita@gmail.com\",\r\n  \"password\": \"sanchita@123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Authenticates a registered user using their email and password.  \nReturns a JWT token that allows the user to access authorized USER APIs."
+              },
+              "response": [
+                {
+                  "name": "User Login",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\r\n  \"email\": \"sanchita@gmail.com\",\r\n  \"password\": \"sanchita@123\"\r\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "http://localhost:8080/auth/login",
+                      "protocol": "http",
+                      "host": [
+                        "localhost"
+                      ],
+                      "port": "8080",
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "Text",
+                  "header": [
+                    {
+                      "key": "X-Content-Type-Options",
+                      "value": "nosniff"
+                    },
+                    {
+                      "key": "X-XSS-Protection",
+                      "value": "0"
+                    },
+                    {
+                      "key": "Cache-Control",
+                      "value": "no-cache, no-store, max-age=0, must-revalidate"
+                    },
+                    {
+                      "key": "Pragma",
+                      "value": "no-cache"
+                    },
+                    {
+                      "key": "Expires",
+                      "value": "0"
+                    },
+                    {
+                      "key": "X-Frame-Options",
+                      "value": "DENY"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    },
+                    {
+                      "key": "Transfer-Encoding",
+                      "value": "chunked"
+                    },
+                    {
+                      "key": "Date",
+                      "value": "Mon, 14 Sep 2026 09:46:24 GMT"
+                    },
+                    {
+                      "key": "Keep-Alive",
+                      "value": "timeout=60"
+                    },
+                    {
+                      "key": "Connection",
+                      "value": "keep-alive"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"token\": \"{{json_web_token}}\",\n    \"tokenType\": \"Bearer\",\n    \"userId\": 1,\n    \"role\": \"USER\"\n}"
+                }
+              ]
+            }
+          ],
+          "description": "User and Admin Login"
+        }
+      ],
+      "description": "Provides authentication APIs for user registration and login. Returns JWT tokens for authenticated users and administrators."
+    },
+    {
+      "name": "Resource Types",
+      "item": [
+        {
+          "name": "Create Resource Type(ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Equipment\",\r\n  \"description\": \"Equipment available for booking, such as projectors, laptops, and other technical devices.\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/resource-types/create-resource-type",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resource-types",
+                "create-resource-type"
+              ]
+            },
+            "description": "Creates a new resource type by accepting its name and description.  \nThe newly created resource type can be associated with resources available for booking."
+          },
+          "response": [
+            {
+              "name": "Create Resource Type(ADMIN Only)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Equipment\",\r\n  \"description\": \"Equipment available for booking, such as projectors, laptops, and other technical devices.\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/resource-types/create-resource-type",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resource-types",
+                    "create-resource-type"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:47:03 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 7,\n    \"name\": \"Equipment\",\n    \"description\": \"Equipment available for booking, such as projectors, laptops, and other technical devices.\",\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Resource Types(ADMIN+USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resource-types/get-resource-type",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resource-types",
+                "get-resource-type"
+              ]
+            },
+            "description": "Retrieves the list of available resource types from the system.  \nAllows users and administrators to view resource types that can be used for booking resources."
+          },
+          "response": [
+            {
+              "name": "Get Resource Types(ADMIN+USER)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resource-types/get-resource-type",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resource-types",
+                    "get-resource-type"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:49:21 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"id\": 1,\n        \"name\": \"Conference Room\",\n        \"description\": \"Updated conference room resource type\",\n        \"active\": true\n    },\n    {\n        \"id\": 2,\n        \"name\": \"Vehicle\",\n        \"description\": \"Vehicles available for booking, including cars, vans, and other transportation resources.\",\n        \"active\": true\n    },\n    {\n        \"id\": 7,\n        \"name\": \"Equipment\",\n        \"description\": \"Equipment available for booking, such as projectors, laptops, and other technical devices.\",\n        \"active\": true\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Resource Type By Id(ADMIN+USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resource-types/get-resource-type-by-Id/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resource-types",
+                "get-resource-type-by-Id",
+                "2"
+              ]
+            },
+            "description": "Retrieves a specific resource type from the system using its unique ID.  \nAllows users and administrators to view the details of the selected resource type."
+          },
+          "response": [
+            {
+              "name": "Get Resource Type By Id(ADMIN+USER)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resource-types/get-resource-type-by-Id/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resource-types",
+                    "get-resource-type-by-Id",
+                    "2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:50:01 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 2,\n    \"name\": \"Vehicle\",\n    \"description\": \"Vehicles available for booking, including cars, vans, and other transportation resources.\",\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Resource Type(ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Conference Room\",\r\n    \"description\": \"Updated conference room resource type\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/resource-types/update-resource-type/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resource-types",
+                "update-resource-type",
+                "1"
+              ]
+            },
+            "description": "Updates an existing resource type using its unique ID and the provided details.  \nThis API allows administrators to modify the resource type name, description, or active status."
+          },
+          "response": [
+            {
+              "name": "Update Resource Type(ADMIN Only)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Conference Room\",\r\n    \"description\": \"Updated conference room resource type\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/resource-types/update-resource-type/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resource-types",
+                    "update-resource-type",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:50:39 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 1,\n    \"name\": \"Conference Room\",\n    \"description\": \"Updated conference room resource type\",\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Resource Type (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resource-types/delete-resource-type/6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resource-types",
+                "delete-resource-type",
+                "6"
+              ]
+            },
+            "description": "Deletes an existing resource type from the system using its unique ID.  \nThis API allows administrators to remove resource types that are no longer required."
+          },
+          "response": [
+            {
+              "name": "Delete Resource Type (ADMIN Only)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resource-types/delete-resource-type/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resource-types",
+                    "delete-resource-type",
+                    "2"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:51:09 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ],
+      "description": "Provides APIs to create, view, update, and delete resource types in the system.  \nAllows administrators to manage resource types, while users can view available resource types."
+    },
+    {
+      "name": "Resources",
+      "item": [
+        {
+          "name": "Create Resources (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Meeting Room 101\",\r\n  \"description\": \"Meeting room with projector and Wi-Fi\",\r\n  \"location\": \"Pune Office - 1st Floor\",\r\n  \"resourceTypeId\": 1,\r\n  \"pricePerHour\": 300.00,\r\n  \"active\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/resources/createResource",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resources",
+                "createResource"
+              ]
+            },
+            "description": "Creates a new bookable resource by providing its basic details, resource type, location, and price per hour.  \nThis API allows administrators to add an active or inactive resource to the system for booking."
+          },
+          "response": [
+            {
+              "name": "Create Resources (ADMIN Only)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Meeting Room 102\",\r\n  \"description\": \"Meeting room with projector and Wi-Fi\",\r\n  \"location\": \"Pune Office - 1st Floor\",\r\n  \"resourceTypeId\": 1,\r\n  \"pricePerHour\": 300.00,\r\n  \"active\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/resources/createResource",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resources",
+                    "createResource"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:51:39 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 7,\n    \"name\": \"Meeting Room 102\",\n    \"description\": \"Meeting room with projector and Wi-Fi\",\n    \"location\": \"Pune Office - 1st Floor\",\n    \"resourceTypeId\": 1,\n    \"resourceTypeName\": \"Conference Room\",\n    \"pricePerHour\": 300,\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Resources (ADMIN+USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resources/getResource",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resources",
+                "getResource"
+              ]
+            },
+            "description": "Retrieves the list of resources available in the system.  \nThis API allows users and administrators to view resources that can be booked."
+          },
+          "response": [
+            {
+              "name": "Get Resources (ADMIN+USER)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resources/getResource",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resources",
+                    "getResource"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:52:14 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"id\": 1,\n        \"name\": \"Conference Room B\",\n        \"description\": \"Updated conference room\",\n        \"location\": \"Pune Office\",\n        \"resourceTypeId\": 1,\n        \"resourceTypeName\": \"Conference Room\",\n        \"pricePerHour\": 500,\n        \"active\": true\n    },\n    {\n        \"id\": 2,\n        \"name\": \"Conference Room B Updated\",\n        \"description\": \"10-person meeting room with projector, whiteboard, and high-speed Wi-Fi\",\n        \"location\": \"Pune Office\",\n        \"resourceTypeId\": 1,\n        \"resourceTypeName\": \"Conference Room\",\n        \"pricePerHour\": 600,\n        \"active\": true\n    },\n    {\n        \"id\": 5,\n        \"name\": \"Meeting Room 101\",\n        \"description\": \"Meeting room with projector and Wi-Fi\",\n        \"location\": \"Pune Office - 1st Floor\",\n        \"resourceTypeId\": 1,\n        \"resourceTypeName\": \"Conference Room\",\n        \"pricePerHour\": 300,\n        \"active\": true\n    },\n    {\n        \"id\": 6,\n        \"name\": \"Meeting Room 100\",\n        \"description\": \"Meeting room with projector and Wi-Fi\",\n        \"location\": \"Pune Office - 1st Floor\",\n        \"resourceTypeId\": 1,\n        \"resourceTypeName\": \"Conference Room\",\n        \"pricePerHour\": 300,\n        \"active\": true\n    },\n    {\n        \"id\": 7,\n        \"name\": \"Meeting Room 102\",\n        \"description\": \"Meeting room with projector and Wi-Fi\",\n        \"location\": \"Pune Office - 1st Floor\",\n        \"resourceTypeId\": 1,\n        \"resourceTypeName\": \"Conference Room\",\n        \"pricePerHour\": 300,\n        \"active\": true\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Resources By Id (ADMIN + USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resources/getResourceById/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resources",
+                "getResourceById",
+                "2"
+              ]
+            },
+            "description": "Retrieves a specific resource using its unique resource ID.  \nThis API allows users and administrators to view the details of the selected resource."
+          },
+          "response": [
+            {
+              "name": "Get Resources By Id (ADMIN + USER)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resources/getResourceById/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resources",
+                    "getResourceById",
+                    "2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:52:31 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 2,\n    \"name\": \"Conference Room B Updated\",\n    \"description\": \"10-person meeting room with projector, whiteboard, and high-speed Wi-Fi\",\n    \"location\": \"Pune Office\",\n    \"resourceTypeId\": 1,\n    \"resourceTypeName\": \"Conference Room\",\n    \"pricePerHour\": 600,\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Resources (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Conference Room B\",\r\n    \"description\": \"Updated conference room\",\r\n    \"location\": \"Pune Office\",\r\n    \"resourceTypeId\": 1,\r\n    \"pricePerHour\": 500.00,\r\n    \"active\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/resources/updateResource/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resources",
+                "updateResource",
+                "1"
+              ]
+            },
+            "description": "Updates an existing resource using its unique ID and the provided resource details.  \nThis API allows administrators to modify the resource name, description, location, type, price, or active status."
+          },
+          "response": [
+            {
+              "name": "Update Resources (ADMIN Only)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Conference Room B\",\r\n    \"description\": \"Updated conference room\",\r\n    \"location\": \"Pune Office\",\r\n    \"resourceTypeId\": 1,\r\n    \"pricePerHour\": 500.00,\r\n    \"active\": true\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/resources/updateResource/1",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resources",
+                    "updateResource",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:53:08 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 1,\n    \"name\": \"Conference Room B\",\n    \"description\": \"Updated conference room\",\n    \"location\": \"Pune Office\",\n    \"resourceTypeId\": 1,\n    \"resourceTypeName\": \"Conference Room\",\n    \"pricePerHour\": 500,\n    \"active\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Resources (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/resources/deleteResource/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "resources",
+                "deleteResource",
+                "2"
+              ]
+            },
+            "description": "Deletes an existing resource from the system using its unique ID.  \nThis API allows administrators to remove resources that are no longer available for booking."
+          },
+          "response": [
+            {
+              "name": "Delete Resources (ADMIN Only)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/resources/deleteResource/5",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "resources",
+                    "deleteResource",
+                    "5"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 09:54:56 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ],
+      "description": "Provides APIs to create, view, update, and delete bookable resources in the system.  \nAdministrators can manage resources, while users can view available resources for booking."
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Create Reservation (ADMIN+USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"resourceId\": 2,\r\n  \"startTime\": \"2026-09-10T15:00:00\",\r\n  \"endTime\": \"2026-09-10T18:00:00\",\r\n  \"notes\": \"Meeting with development team\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/reservation/request/createReservation",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "request",
+                "createReservation"
+              ]
+            },
+            "description": "Creates a new reservation for a selected resource by providing the resource ID, start time, end time, and notes.  \nThe reservation is associated with the authenticated user and is created with the appropriate reservation status."
+          },
+          "response": [
+            {
+              "name": "Create Reservation (ADMIN+USER)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"resourceId\": 2,\r\n  \"startTime\": \"2028-09-10T03:00:00\",\r\n  \"endTime\": \"2028-09-10T04:00:00\",\r\n  \"notes\": \"Meeting with development team\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/reservation/request/createReservation",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "request",
+                    "createReservation"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:34:57 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 9,\n    \"reservationNumber\": \"RES-1789382097604\",\n    \"resourceId\": 2,\n    \"resourceName\": \"Conference Room B Updated\",\n    \"startTime\": \"2028-09-10T03:00:00\",\n    \"endTime\": \"2028-09-10T04:00:00\",\n    \"price\": 600,\n    \"status\": \"PENDING\",\n    \"notes\": \"Meeting with development team\",\n    \"cancellationReason\": null,\n    \"cancelledAt\": null,\n    \"createdAt\": \"2026-09-14T16:04:57.6049991\",\n    \"updatedAt\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get My Reservation (USER Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/reservation/request/getMyReservation",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "request",
+                "getMyReservation"
+              ]
+            },
+            "description": "Retrieves all reservations created by the currently authenticated user.  \nThis API allows users to view and track the details and status of their own reservations."
+          },
+          "response": [
+            {
+              "name": "Get My Reservation (USER Only)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/reservation/request/getMyReservation",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "request",
+                    "getMyReservation"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:37:57 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n    {\n        \"id\": 3,\n        \"reservationNumber\": \"RES-1788711716051\",\n        \"resourceId\": 2,\n        \"resourceName\": \"Conference Room B Updated\",\n        \"startTime\": \"2026-09-12T12:00:00\",\n        \"endTime\": \"2026-09-12T15:00:00\",\n        \"price\": 1500,\n        \"status\": \"CANCELLED\",\n        \"notes\": \"Vehicle required for an official client visit. Please ensure the vehicle is clean and ready before pickup.\",\n        \"cancellationReason\": \"User requested cancellation due to schedule change\",\n        \"cancelledAt\": \"2026-09-10T00:01:46.141983\",\n        \"createdAt\": \"2026-09-06T21:51:56.05192\",\n        \"updatedAt\": \"2026-09-10T00:01:46.166303\"\n    },\n    {\n        \"id\": 5,\n        \"reservationNumber\": \"RES-1788981493237\",\n        \"resourceId\": 1,\n        \"resourceName\": \"Conference Room B\",\n        \"startTime\": \"2026-09-11T19:00:00\",\n        \"endTime\": \"2026-09-11T20:00:00\",\n        \"price\": 500,\n        \"status\": \"CONFIRMED\",\n        \"notes\": \"Meeting with development team\",\n        \"cancellationReason\": null,\n        \"cancelledAt\": null,\n        \"createdAt\": \"2026-09-10T00:48:13.237179\",\n        \"updatedAt\": \"2026-09-10T01:09:23.139449\"\n    },\n    {\n        \"id\": 9,\n        \"reservationNumber\": \"RES-1789382097604\",\n        \"resourceId\": 2,\n        \"resourceName\": \"Conference Room B Updated\",\n        \"startTime\": \"2028-09-10T03:00:00\",\n        \"endTime\": \"2028-09-10T04:00:00\",\n        \"price\": 600,\n        \"status\": \"PENDING\",\n        \"notes\": \"Meeting with development team\",\n        \"cancellationReason\": null,\n        \"cancelledAt\": null,\n        \"createdAt\": \"2026-09-14T16:04:57.604999\",\n        \"updatedAt\": null\n    }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Reservation By Id (ADMIN + USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/reservation/request/getReservationById/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "request",
+                "getReservationById",
+                "3"
+              ]
+            },
+            "description": "Retrieves a specific reservation using its unique reservation ID.  \nThis API allows users to view their own reservation details, while administrators can view any reservation."
+          },
+          "response": [
+            {
+              "name": "Get Reservation By Id (ADMIN + USER)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/reservation/request/getReservationById/3",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "request",
+                    "getReservationById",
+                    "3"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:03:31 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 3,\n    \"reservationNumber\": \"RES-1788711716051\",\n    \"resourceId\": 2,\n    \"resourceName\": \"Conference Room B Updated\",\n    \"startTime\": \"2026-09-12T12:00:00\",\n    \"endTime\": \"2026-09-12T15:00:00\",\n    \"price\": 1500,\n    \"status\": \"CANCELLED\",\n    \"notes\": \"Vehicle required for an official client visit. Please ensure the vehicle is clean and ready before pickup.\",\n    \"cancellationReason\": \"User requested cancellation due to schedule change\",\n    \"cancelledAt\": \"2026-09-10T00:01:46.141983\",\n    \"createdAt\": \"2026-09-06T21:51:56.05192\",\n    \"updatedAt\": \"2026-09-10T00:01:46.166303\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Reservation (ADMIN + USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"cancellationReason\": \"User requested cancellation due to schedule change\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/reservation/request/cancelReservation/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "request",
+                "cancelReservation",
+                "4"
+              ]
+            },
+            "description": "Cancels an existing reservation using its unique reservation ID and cancellation reason.  \nThis API allows users to cancel their own reservations, while administrators can cancel any reservation."
+          },
+          "response": [
+            {
+              "name": "Cancel Reservation (ADMIN + USER)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"cancellationReason\": \"due to schedule change\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/reservation/request/cancelReservation/9",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "request",
+                    "cancelReservation",
+                    "9"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:39:14 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 9,\n    \"reservationNumber\": \"RES-1789382097604\",\n    \"resourceId\": 2,\n    \"resourceName\": \"Conference Room B Updated\",\n    \"startTime\": \"2028-09-10T03:00:00\",\n    \"endTime\": \"2028-09-10T04:00:00\",\n    \"price\": 600,\n    \"status\": \"CANCELLED\",\n    \"notes\": \"Meeting with development team\",\n    \"cancellationReason\": \"due to schedule change\",\n    \"cancelledAt\": \"2026-09-14T16:09:14.0175302\",\n    \"createdAt\": \"2026-09-14T16:04:57.604999\",\n    \"updatedAt\": \"2026-09-14T16:09:14.0242969\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Reservation (ADMIN)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/reservation/getAllReservations?status=CONFIRMED&minPrice=500&maxPrice=2000&page=0&size=5&sort=price,desc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "getAllReservations"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "CONFIRMED"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "500"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "2000"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "5"
+                },
+                {
+                  "key": "sort",
+                  "value": "price,desc"
+                }
+              ]
+            },
+            "description": "Retrieves all reservations from the system with optional filters for reservation status and price range.  \nSupports pagination to efficiently retrieve reservation records in a structured format."
+          },
+          "response": [
+            {
+              "name": "Get All Reservation (ADMIN)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/reservation/getAllReservations?status=CONFIRMED&minPrice=500&maxPrice=2000&page=0&size=5&sort=price,desc",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "getAllReservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "CONFIRMED"
+                    },
+                    {
+                      "key": "minPrice",
+                      "value": "500"
+                    },
+                    {
+                      "key": "maxPrice",
+                      "value": "2000"
+                    },
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "5"
+                    },
+                    {
+                      "key": "sort",
+                      "value": "price,desc"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:43:12 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"content\": [\n        {\n            \"id\": 5,\n            \"reservationNumber\": \"RES-1788981493237\",\n            \"resourceId\": 1,\n            \"resourceName\": \"Conference Room B\",\n            \"startTime\": \"2026-09-11T19:00:00\",\n            \"endTime\": \"2026-09-11T20:00:00\",\n            \"price\": 500,\n            \"status\": \"CONFIRMED\",\n            \"notes\": \"Meeting with development team\",\n            \"cancellationReason\": null,\n            \"cancelledAt\": null,\n            \"createdAt\": \"2026-09-10T00:48:13.237179\",\n            \"updatedAt\": \"2026-09-10T01:09:23.139449\"\n        }\n    ],\n    \"page\": 0,\n    \"size\": 5,\n    \"totalElements\": 1,\n    \"totalPages\": 1,\n    \"first\": true,\n    \"last\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Reservation (ADMIN + USER)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"resourceId\": 1,\r\n  \"startTime\": \"2026-09-11T19:00:00\",\r\n  \"endTime\": \"2026-09-11T20:00:00\",\r\n  \"notes\": \"Meeting with development team\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/reservation/request/updateReservation/5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "request",
+                "updateReservation",
+                "5"
+              ]
+            },
+            "description": "Updates an existing reservation using its unique reservation ID and the provided reservation details.  \nThis API allows authorized users to modify their own eligible reservations, while administrators can update reservations as permitted."
+          },
+          "response": [
+            {
+              "name": "Update Reservation (ADMIN + USER)",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"resourceId\": 1,\r\n  \"startTime\": \"2028-09-11T19:00:00\",\r\n  \"endTime\": \"2028-09-11T21:00:00\",\r\n  \"notes\": \"Meeting with development team\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8080/reservation/request/updateReservation/10",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "request",
+                    "updateReservation",
+                    "10"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:45:32 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 10,\n    \"reservationNumber\": \"RES-1789382695300\",\n    \"resourceId\": 1,\n    \"resourceName\": \"Conference Room B\",\n    \"startTime\": \"2028-09-11T19:00:00\",\n    \"endTime\": \"2028-09-11T21:00:00\",\n    \"price\": 1000,\n    \"status\": \"PENDING\",\n    \"notes\": \"Meeting with development team\",\n    \"cancellationReason\": null,\n    \"cancelledAt\": null,\n    \"createdAt\": \"2026-09-14T16:14:55.30021\",\n    \"updatedAt\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Reservation (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/reservation/confirmReservation/10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "confirmReservation",
+                "10"
+              ]
+            },
+            "description": "Confirms a pending reservation using its unique reservation ID.  \nThis API allows administrators to approve and change the reservation status to `CONFIRMED`."
+          },
+          "response": [
+            {
+              "name": "Confirm Reservation (ADMIN Only)",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/reservation/confirmReservation/10",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "confirmReservation",
+                    "10"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:46:39 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"id\": 10,\n    \"reservationNumber\": \"RES-1789382695300\",\n    \"resourceId\": 1,\n    \"resourceName\": \"Conference Room B\",\n    \"startTime\": \"2028-09-11T19:00:00\",\n    \"endTime\": \"2028-09-11T21:00:00\",\n    \"price\": 1000,\n    \"status\": \"CONFIRMED\",\n    \"notes\": \"Meeting with development team\",\n    \"cancellationReason\": null,\n    \"cancelledAt\": null,\n    \"createdAt\": \"2026-09-14T16:14:55.30021\",\n    \"updatedAt\": \"2026-09-14T16:15:32.817656\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Reservation (ADMIN Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/reservation/deleteReservation/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "reservation",
+                "deleteReservation",
+                "1"
+              ]
+            },
+            "description": "Deletes an existing reservation from the system using its unique reservation ID.  \nThis API allows authorized administrators to permanently remove a reservation record."
+          },
+          "response": [
+            {
+              "name": "Delete Reservation (ADMIN Only)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8080/reservation/deleteReservation/2",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "reservation",
+                    "deleteReservation",
+                    "2"
+                  ]
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "0"
+                },
+                {
+                  "key": "Cache-Control",
+                  "value": "no-cache, no-store, max-age=0, must-revalidate"
+                },
+                {
+                  "key": "Pragma",
+                  "value": "no-cache"
+                },
+                {
+                  "key": "Expires",
+                  "value": "0"
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "DENY"
+                },
+                {
+                  "key": "Date",
+                  "value": "Mon, 14 Sep 2026 10:15:02 GMT"
+                },
+                {
+                  "key": "Keep-Alive",
+                  "value": "timeout=60"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                }
+              ],
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ],
+      "description": "Provides APIs to create, view, confirm, update, and cancel resource reservations.  \nUsers can manage their own reservations, while administrators can manage all reservations in the system."
+    }
+  ],
+  "variable": [
+    {
+      "key": "auth_secret_0qto"
+    },
+    {
+      "key": "supabase_service_role_api_key_0g9o"
+    },
+    {
+      "key": "supabase_service_role_api_key_0hih"
+    }
+  ]
+}
