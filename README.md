@@ -92,6 +92,8 @@ Complete API documentation, including endpoints, request bodies, authorization, 
 
 The Postman collection is included in this repository.
 
+https://github.com/exelynt-learning-platform/backend-developer-as-final-12785-sanchita/blob/backend-developer-assignment-deadline-30th-sep-2026-64051-2876/Resource_Booking_System.postman_collection.json
+
 Import the downloaded JSON file into Postman to test the APIs.
 
 ### Postman Published Documentation
