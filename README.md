@@ -44,16 +44,22 @@ This project uses MySQL.
 
 ### 1. Create the Database
 Open MySQL and execute:
+
 CREATE DATABASE resourcemanagement;
 
 ### 2. Configure the Database
 The application uses the following configuration:
 
 spring.datasource.url=jdbc:mysql://localhost:3306/resourcemanagement
+
 spring.datasource.username=${DB_USERNAME}
+
 spring.datasource.password=${DB_PASSWORD}
+
 spring.jpa.hibernate.ddl-auto=update
+
 spring.jpa.show-sql=true
+
 jwt.secret=${JWT_SECRET}
 
 Hibernate automatically creates and updates the required tables using:
@@ -61,8 +67,11 @@ spring.jpa.hibernate.ddl-auto=update
 
 ## Environment Variables
 Set the following environment variables before running the application:
+
 DB_USERNAME=root
+
 DB_PASSWORD=your_mysql_password
+
 JWT_SECRET= ResourceBookingSystemSecretKey2026SecureABC123XYZ789
 
 
